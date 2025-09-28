@@ -30,7 +30,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Illuminate\Support\Facades\DB;
-use App\Exports\OrdersExport;
+// use App\Exports\OrdersExport;
 use App\Exports\OrdersExport2;
 use App\Exports\OrdersExport3;
 use App\Exports\OrdersExport6;
@@ -97,22 +97,22 @@ class ContractsController extends Controller
      */
     public function index(Request $request)
     {
-        // if($request->user()->hasPermission(['admin.contracts.index','contracts.contracts.index'])){
-        if($request->user()->hasPermission(['admin.contracts.index', 'contracts.contracts.all'])){
+        
+        // if($request->user()->hasPermission(['admin.contracts.index', 'contracts.contracts.all'])){
+        if($request->user()->hasPermission(['admin.contracts.index'])){            
             //SE DEBEN MOSTRAR TODOS LOS PEDIDOS SI ES DE UOC NO IMPORTAN LOS ESTADOS
             //DETERMINAR QUE DEPENDENCIAS DEBEN SOLO VER CONTRATOS DE OBRAS
             $contracts = Contract::where('contract_state_id', '>=', 1)                    
-                    ->where('contract_type_id', '=', 2)//solo muestra contratos de obras
-                    ->where('contract_state_id', '=', 1)//solo muestra contratos en cursos
-                    ->where('year_adj', '>=', 2024)//solo muestra desde año 2024
+                    // ->where('contract_type_id', '=', 2)//solo muestra contratos de obras
+                    // ->where('contract_state_id', '=', 1)//solo muestra contratos en cursos
+                    // ->where('year_adj', '>=', 2024)//solo muestra desde año 2024
                     ->orderBy('iddncp','asc')
                     ->get();
             $dependency = $request->user()->dependency_id;
         }else{                
             $contracts = Contract::where('dependency_id', $request->user()->dependency_id)
-            ->where('contract_state_id', '>=', 1)
-            // $contracts = Contract::where('contract_state_id', '>=', 1)
-            ->where('contract_type_id', '=', 2)//solo muestra contratos de obras
+            ->where('contract_state_id', '>=', 1)            
+            // ->where('contract_type_id', '=', 2)//solo muestra contratos de obras
             ->orderBy('iddncp','asc')
             ->get();
 
@@ -148,11 +148,11 @@ class ContractsController extends Controller
     }
 
     //Para exportar a Excel pedidos encurso aún sn adjudicación
-    public function exportarExcel()
-    {
-        return Excel::download(new OrdersExport, 'pedidos.xlsx');
+    // public function exportarExcel()
+    // {
+    //     return Excel::download(new OrdersExport, 'pedidos.xlsx');
 
-    }
+    // }
 
     //Para exportar a Excel pedidos adjudicados
     public function exportarExcel2()
@@ -376,8 +376,7 @@ class ContractsController extends Controller
             // $orders = $contract->orders;            
             //MUESTRA TODAS LAS ORDENES MENOS LAS QUE ESTAN SUSPENDIDAS = ESTADO 2
             $orders = $contract->orders()->where('order_state_id', '!=', 2)->get();
-        }        
-        
+        }                
         
         // Obtener todos los eventos del contrato a través de las órdenes
         $events = $contract->orders->flatMap->events;
@@ -400,8 +399,7 @@ class ContractsController extends Controller
         // $user_files_rubros = ItemContract::findOrFail($contract_id);
         $user_dependency = $request->user()->dependency_id;
         $user_id = $request->user()->id;
-        $role_user = $request->user()->role_id;
-        
+        $role_user = $request->user()->role_id;        
 
         // Obtenemos los archivos cargados por usuarios con tipo de archivos 1 pólizas
         $user_files_pol = $contract->files()->where('dependency_id', $user_dependency)
