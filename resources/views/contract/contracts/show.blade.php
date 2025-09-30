@@ -139,11 +139,11 @@
                                             </div>
 
                                             <div class="col-sm-2">
-                                                {{-- @if (Auth::user()->hasPermission(['admin.contracts.update']))                                                    
-                                                    <button class="btn btn-primary dropdown-toggle waves-effect"
-                                                        type="button" id="acciones" data-toggle="dropdown"
-                                                        aria-haspopup="true" aria-expanded="true">Acciones</button>                                                    
-                                                @endif --}}
+                                                @if (Auth::user()->hasPermission(['admin.orders.create','admin.orders.update']))
+                                                    {{-- @if (in_array($contract->contract_state_id, [1,2])) --}}
+                                                        <button class="btn btn-primary dropdown-toggle waves-effect" type="button" id="acciones" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
+                                                    {{-- @endif --}}
+                                                @endif
 
                                                 <div class="dropdown-menu" aria-labelledby="acciones"
                                                     data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
@@ -153,8 +153,7 @@
                                                             Auth::user()->hasPermission(['admin.contracts.update']))
                                                         <a style="font-size: 14px; font-weight: bold; color:blue;background-color:lightblue;"
                                                             class="dropdown-item waves-effect f-w-600"
-                                                            href="{{ route('contracts.edit', $contract->id) }}">Editar
-                                                            Contrato</a>
+                                                            href="{{ route('contracts.edit', $contract->id) }}">Editar Contrato</a>
                                                     @endif
 
                                                     @if (Auth::user()->hasPermission(['admin.contracts.delete']) ||
@@ -185,47 +184,55 @@
                                             
                                             @if (Auth::user()->hasPermission(['admin.items.create', 'contracts.rubros.import']))
                                                 <li class="nav-item">
-                                                    <a class="nav-link" data-toggle="tab" href="#tab5" role="tab"><i
-                                                            class="fa-solid fa-file-excel"></i> Cargar Rubros </a>
+                                                    <a class="nav-link" data-toggle="tab" href="#tab9" role="tab"><i
+                                                            class="fa-solid fa-list"></i> Pólizas </a>
                                                     <div class="slide"></div>
                                                 </li>
                                             @endif
-                                            {{-- @if (Auth::user()->hasPermission(['admin.items.create', 'contracts.rubros.show'])) --}}
-                                            @if (Auth::user()->hasPermission(['admin.items.create', 'contracts.items.show']))
-                                                <li class="nav-item">
-                                                    <a class="nav-link" data-toggle="tab" href="#tab5" role="tab"><i
-                                                            class="fa-solid fa-pen-to-square"></i> Rubros Cargados </a>
-                                                    <div class="slide"></div>
-                                                </li>
-                                            @endif
-                                            @if (Auth::user()->hasPermission(['admin.users.create', 'contracts.users.create']))
-                                                <li class="nav-item">
-                                                    <a class="nav-link" data-toggle="tab" href="#tab3" role="tab"><i
-                                                            class="fa-solid fa-person"></i> Asignar Fiscal <br>(Si contrato está en Curso)</a>
-                                                    <div class="slide"></div>
-                                                </li>
-                                            @endif                                            
+
+                                            {{-- si es contrato de obras --}}
+                                            @if ($contract->contract_type_id == 2)     
+                                                {{-- No mostrar nada si el contrato es abierto --}}
+                                                @if (Auth::user()->hasPermission(['admin.items.create', 'contracts.rubros.import']))
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" data-toggle="tab" href="#tab5" role="tab"><i
+                                                                class="fa-solid fa-file-excel"></i> Cargar Rubros </a>
+                                                        <div class="slide"></div>
+                                                    </li>
+                                                @endif                                            
                                             
-                                            @if (Auth::user()->role->id == 4)
-                                                {{-- No mostrar nada si el rol es 4 --}}
-                                            @else
+                                                @if (Auth::user()->hasPermission(['admin.items.create', 'contracts.items.show']))
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" data-toggle="tab" href="#tab5" role="tab"><i
+                                                                class="fa-solid fa-pen-to-square"></i> Rubros Cargados </a>
+                                                        <div class="slide"></div>
+                                                    </li>
+                                                @endif
+                                                @if (Auth::user()->hasPermission(['admin.users.create', 'contracts.users.create']))
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" data-toggle="tab" href="#tab3" role="tab"><i
+                                                                class="fa-solid fa-person"></i> Asignar Fiscal <br>(Si contrato está en Curso)</a>
+                                                        <div class="slide"></div>
+                                                    </li>
+                                                @endif                                            
+                                            
+                                                @if (Auth::user()->role->id == 4)
+                                                    {{-- No mostrar nada si el rol es 4 --}}
+                                                @else
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" data-toggle="tab" href="#tab1" role="tab"><i
+                                                                class="fa fa-external-link"></i> Eval.Técnica</a>
+                                                        <div class="slide"></div>
+                                                    </li>
+                                                @endif
+                                            
                                                 <li class="nav-item">
-                                                    <a class="nav-link" data-toggle="tab" href="#tab1" role="tab"><i
-                                                            class="fa fa-external-link"></i> Eval.Técnica</a>
+                                                    <a class="nav-link" data-toggle="tab" href="#tab2" role="tab"><i
+                                                            class="fa fa-clone"></i> Órdenes de Ejec.</a>
                                                     <div class="slide"></div>
                                                 </li>
                                             @endif
                                             
-                                            <li class="nav-item">
-                                                <a class="nav-link" data-toggle="tab" href="#tab2" role="tab"><i
-                                                        class="fa fa-clone"></i> Órdenes de Ejec.</a>
-                                                <div class="slide"></div>
-                                            </li>
-                                            {{-- <li class="nav-item">
-                                                <a class="nav-link" data-toggle="tab" href="#tab7" role="tab"><i
-                                                        class="fa-solid fa-file-pdf"></i> Plazos/Prórrogas</a>
-                                                <div class="slide"></div>
-                                            </li> --}}
                                             @if (Auth::user()->role->id == 4)
                                                 {{-- No mostrar nada si el rol es 4 --}}
                                             @else
@@ -865,6 +872,96 @@
                                                     @endif
                                                 </div>
                                             </div>
+
+                                            <div class="tab-pane" id="tab9" role="tabpanel">
+                                            <table id="items" class="table table-striped table-bordered">
+                                                    <thead>X
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Póliza</th>
+                                                            <th>N° de Póliza</th>
+                                                            <th>Vigencia Desde</th>
+                                                            <th>Vigencia Hasta</th>
+                                                            <th>Monto</th>
+                                                            <th>Comentarios</th>
+                                                            <th>Acciones</th>
+                                                            <th>Status</th>
+                                                            <th>Archivo</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @for ($i = 0; $i < count($contract->items); $i++)
+                                                            <tr>
+                                                                <td>{{ ($i+1) }}</td>
+                                                                <td>{{ $contract->items[$i]->policy->description }}</td>
+                                                                <td>{{ $contract->items[$i]->number_policy }}</td>
+                                                                <td>{{ $contract->items[$i]->itemFromDateFormat() }}</td>
+
+                                                                {{-- Se calcula 60 días antes para mostrar colores y botón de Endoso --}}
+                                                                @php
+                                                                    // Ajusta el formato para que coincida con tu cadena de fecha
+                                                                    $toDate = \Carbon\Carbon::createFromFormat('d/m/Y', $contract->items[$i]->itemToDateFormat());
+                                                                    $currentDate = \Carbon\Carbon::now();
+                                                                    $sixtyDaysBefore = $toDate->copy()->subDays(60);  // Resta 60 días a $toDate
+                                                                    // var_dump($sixtyDaysBefore);exit;
+                                                                @endphp
+
+                                                                @if ($currentDate <= $sixtyDaysBefore)
+                                                                    <td style="color:blue;font-weight">{{ $contract->items[$i]->itemToDateFormat() }}</td>
+                                                                @else
+                                                                    <td style="color:red;font-weight">{{ $contract->items[$i]->itemToDateFormat() }}</td>
+                                                                @endif
+
+                                                                <td>{{ $contract->items[$i]->AmountFormat()}} </td>
+                                                                <td>{{ $contract->items[$i]->comments }}</td>
+                                                                <td>
+                                                                {{-- No muestra si estado de llamado no es rescindido, cerrado, impugando o en proceso de rescisión --}}
+                                                                @if (in_array($contract->contract_state_id, [1,5]))
+                                                                    @if (Auth::user()->hasPermission(['admin.items.update','contracts.items.update']))
+                                                                        <button type="button" title="Editar" class="btn btn-warning btn-icon" onclick="updateItem({{ $contract->items[$i]->id }})">
+                                                                            <i class="fa fa-pencil"></i>
+                                                                        </button>
+                                                                    @endif
+                                                                    {{-- @if (Auth::user()->hasPermission(['admin.items.delete','contracts.items.delete']) || $contract->dependency_id == Auth::user()->dependency_id) --}}
+                                                                    @if (Auth::user()->hasPermission(['admin.items.delete','contracts.items.delete']))
+                                                                        <button type="button" title="Borrar" class="btn btn-danger btn-icon" onclick="deleteItem({{ $contract->items[$i]->id }})">
+                                                                            <i class="fa fa-trash"></i>
+                                                                        </button>
+                                                                    @endif
+                                                                @endif
+
+                                                                @if ($currentDate <= $sixtyDaysBefore)
+                                                                    <td style="color:BLUE;font-weight">OK</td>
+                                                                @else
+                                                                    @if (Auth::user()->hasPermission(['admin.items.update','contracts.items.update']) || $contract->dependency_id == Auth::user()->dependency_id)
+                                                                    {{-- @if (Auth::user()->hasPermission(['admin.items.update','contracts.items.update'])) --}}
+                                                                        <button type="button" title="Endosos de Póliza" class="btn btn-primary btn-icon" onclick="itemAwardHistories({{ $contract->items[$i]->id }})">
+                                                                            <i class="fa fa-list"></i>
+                                                                        </button>
+                                                                    @endif
+                                                                    <td style="color:red;font-weight">ALERTA</td>
+                                                                @endif
+                                                                </td>
+                                                                <td>
+                                                                    <a href="{{ asset('storage/files/'.$contract->items[$i]->file) }}" title="Ver Archivo" target="_blank" class="btn btn-success btn-icon"><i class="fa fa-eye"></i></a>
+                                                                </td>
+                                                            </tr>
+                                                        @endfor
+
+                                                    </tbody>
+                                            </table>
+
+                                                <div class="text-right">
+                                                    {{-- @if (Auth::user()->hasPermission(['contracts.contracts.create','admin.orders.create'])) --}}
+                                                    @if (Auth::user()->hasPermission(['admin.orders.create']))
+                                                        {{-- Si pedido está anulado no muestra agregar ítems --}}
+                                                        @if (in_array($contract->contract_state_id, [1]))
+                                                        <a href="{{ route('contracts.items.create', $contract->id) }}" class="btn btn-primary">Agregar Póliza</a>
+                                                        @endif
+                                                    @endif
+                                                </div>
+                                            <span style="font-size: 16px; font-weight: bold; color:red;background-color:yellow;" >MONTO TOTAL DEL LLAMADO: {{ $contract->totalAmountFormat() }}</span>
+                                        </div>
 
                                             <div class="tab-pane" id="tab4" role="tabpanel">
                                                 <label class="col-form-label f-w-600">Reportes:</label>

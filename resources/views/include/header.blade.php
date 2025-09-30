@@ -5,7 +5,7 @@
             <div class="navbar-wrapper">
                 <div class="navbar-logo">
                     <a href="{{ route('home') }}">
-                        SISOE
+                        SISCONTRA
                     </a>
                     <a class="mobile-menu" id="mobile-collapse" href="#!">
                         <i class="feather icon-menu icon-toggle-right"></i>

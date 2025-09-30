@@ -102,7 +102,7 @@ class ContractsController extends Controller
             //SE DEBEN MOSTRAR TODOS LOS PEDIDOS SI ES DE UOC NO IMPORTAN LOS ESTADOS
             //DETERMINAR QUE DEPENDENCIAS DEBEN SOLO VER CONTRATOS DE OBRAS
             $contracts = Contract::where('contract_state_id', '>=', 1)                    
-                    ->where('contract_type_id', '=', 2)//solo muestra contratos de obras
+                    // ->where('contract_type_id', '=', 2)//solo muestra contratos de obras
                     ->where('contract_state_id', '=', 1)//solo muestra contratos en cursos
                     ->where('year_adj', '>=', 2024)//solo muestra desde año 2024
                     ->orderBy('iddncp','asc')

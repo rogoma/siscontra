@@ -16,19 +16,36 @@ p.centrado {
             <div class="col-lg-8">
                 <div class="page-header-title">
                     <i class="fas fa-list bg-c-blue"></i>
-                    <div class="d-inline">                                               
-                        <h5>Listado de Contratos de Obras</h5>
-                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                        <br>
+                    <div class="d-inline">
+                        
                         {{-- si es de UOC, role = 30 o si es contratista role = 4 no muestra reportes --}}
                         @if (Auth::user()->role->id == 30 || Auth::user()->role->id == 4)
-                        @else    
+                            <h5>Listado de Llamados</h5>
+                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                            <br>
+                            <a href="pdf/panel_contracts0" class="btn btn-outline-primary" target="_blank"> TOTAL LLAMADOS</a>
+                            <a href="pdf/panel_contracts1" class="btn btn-outline-warning" target="_blank">EN CURSO</a>
+                            <a href="pdf/panel_contracts6" class="btn btn-outline-success" target="_blank">EN PROCESO RESCISIÓN</a>
+                            <a href="pdf/panel_contracts2" class="btn btn-outline-warning" target="_blank">RESCINDIDOS</a>
+                            <a href="pdf/panel_contracts3" class="btn btn-outline-danger" target="_blank">CERRADOS</a>
+
+                        @else
+                            <h5>Listado de Contratos</h5>
+                            <br>    
+                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                            <br>    
                             <a href="pdf/panel_orders1" class="btn btn-outline-primary" target="_blank"> TOTAL ORDENES</a>
                             <a href="pdf/tablero" class="btn btn-outline-danger" target="_blank"> TABLERO</a>
                             <a href="/orders/exportarorders2" class="btn btn-outline-success">TOTAL ORDENES EXCEL</a>
                         @endif
-                    </div>
-                </div>                
+                    </div>                    
+                </div>
+                @if (Auth::user()->hasPermission(['admin.orders.create']))
+                                        <div class="float-left">
+                                            <br>
+                                            <a href="{{ route('contracts.create') }}" title="Agregar llamado" class="btn btn-primary">Agregar Llamado</a>
+                                        </div>
+                                    @endif                
             </div>
             <div class="col-lg-4">
                 <div class="page-header-breadcrumb">
