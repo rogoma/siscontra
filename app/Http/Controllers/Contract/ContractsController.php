@@ -98,8 +98,8 @@ class ContractsController extends Controller
     public function index(Request $request)
     {
         
-        // if($request->user()->hasPermission(['admin.contracts.index', 'contracts.contracts.all'])){
-        if($request->user()->hasPermission(['admin.contracts.index'])){            
+        if($request->user()->hasPermission(['admin.contracts.index', 'contracts.contracts.all'])){
+        // if($request->user()->hasPermission(['admin.contracts.index'])){            
             //SE DEBEN MOSTRAR TODOS LOS PEDIDOS SI ES DE UOC NO IMPORTAN LOS ESTADOS
             //DETERMINAR QUE DEPENDENCIAS DEBEN SOLO VER CONTRATOS DE OBRAS
             $contracts = Contract::where('contract_state_id', '>=', 1)                    
