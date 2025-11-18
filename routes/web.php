@@ -75,9 +75,6 @@ Route::post('/login', [HomeController::class, 'checkLogin'])->name('checkLogin')
 Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('/tablero', [HomeController::class, 'tablero']);
-
-
 // obtener el token csrf
 Route::get('/token', function (Request $request) {
     $token = csrf_token();
@@ -85,6 +82,10 @@ Route::get('/token', function (Request $request) {
 });
 
 Route::middleware('auth')->group(function () {  // Las siguientes funcionalidades son accedidas solamente estando el usuario autenticado
+
+Route::get('/tablero', [HomeController::class, 'tablero']);
+
+Route::get('contracts/getNotifications', [ContractsController::class, 'getNotifications'])->name('contracts.getNotifications');            
     /********** MODULO ADMINISTRADOR **********/
 
     //USUARIOS A EXCEL - //PARA GENERAR ARCHIVOS EXCEL PRIMERO SE COLOCA EL GET ANTES DEL RESOURCE
@@ -477,8 +478,7 @@ Route::middleware('auth')->group(function () {  // Las siguientes funcionalidade
     // Route::delete('/contracts/contract/{contract_id}/delete', 'ContractController@delete')->name('contracts.delete');
     Route::delete('contracts/contract/{contract_id}/delete', [ContractsController::class, 'destroy'])->name('contracts.delete');
 
-    Route::get('contracts/getNotifications', [ContractsController::class, 'getNotifications'])->name('contracts.getNotifications');            
-    
+       
     Route::resource('contracts', ContractsController::class);
     Route::get('/contracts/{id}', [ContractsController::class, 'show'])->name('contracts.show');
 

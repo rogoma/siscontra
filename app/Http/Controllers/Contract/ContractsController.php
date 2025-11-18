@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Enviar_alertas;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Contract;
 use App\Models\Order;
@@ -985,62 +986,107 @@ class ContractsController extends Controller
      */
 
     public function getNotifications(Request $request)
-    {
-        //alertas general abarca todas las dependencias para mostrar la campanita
-        if($request->user()->hasPermission(['admin.contracts.show'])){
-            $orders = DB::table('vista_contracts_full3')//vista que muestra los datos
-                ->select(['contrato', 'iddncp','number_year','year_adj','contratista',
-                'estado', 'modalidad', 'tipo_contrato','amount', 'item_from',
-                'item_to','comments'])
-                ->whereIn('state_id', [1])//1-En curso
-                ->where([
-                    ['dias_advance', '<=', 0],
-                    ['dias_advance_endo', null],
-                ])
-                ->orwhere([
-                    ['dias_advance', '<=', 0],
-                    ['dias_advance_endo', '<=', 0]
-                ])
-                ->get();
+{
+    $user = $request->user();
+    $isAdmin = $user->hasPermission(['admin.contracts.show']);
 
-                $alerta_advance = array();
+    // Construyo la parte común de la consulta en un Query Builder sin ejecutar ->get() aún
+    $baseSelect = [
+        'contrato','iddncp','number_year','year_adj','contratista',
+        'estado','modalidad','tipo_contrato','amount','item_from',
+        'item_to','comments'
+    ];
 
-                foreach($orders as $order){
-                    $pac_id = number_format($order->iddncp,0,",",".");
-                    array_push($alerta_advance, array('pac_id' => $pac_id));
-                }
-        }else{
-            //alertas por dependencias para mostrar la campanita
-            $orders = DB::table('vista_contracts_full3')//vista que muestra los datos
-                ->select(['contrato', 'iddncp','number_year','year_adj','contratista',
-                'estado', 'modalidad', 'tipo_contrato','amount', 'item_from',
-                'item_to','comments', 'dias_advance', 'dependency_id'])
-                ->whereIn('state_id', [1])//1-En curso
-                ->where([
-                    ['dias_advance', '<=', 0],
-                    ['dias_advance_endo', null]
-                ])
-                ->orwhere([
-                    ['dias_advance', '<=', 0],
-                    ['dias_advance_endo', '<=', 0]
-                ])
-                ->where('dependency_id', $request->user()->dependency_id)//filtra por dependencia que generó la info
-                ->get();
+    $table = 'vista_contracts_full3';
 
-                $alerta_advance = array();
+    $query = DB::table($table)->select($baseSelect)
+        ->whereIn('state_id', [1]) // 1 - En curso
+        ->where(function ($q) {
+            $q->where(function ($q2) {
+                $q2->where('dias_advance', '<=', 0)
+                   ->whereNull('dias_advance_endo');
+            })->orWhere(function ($q3) {
+                $q3->where('dias_advance', '<=', 0)
+                   ->where('dias_advance_endo', '<=', 0);
+            });
+        });
 
-                foreach($orders as $order){
-                    if ($order->dependency_id == $request->user()->dependency_id){
-                        $dependency_id = number_format($order->dependency_id,0,",",".");
-                        $pac_id = number_format($order->iddncp,0,",",".");
-                        array_push($alerta_advance, array('pac_id' => $pac_id));
-                    }else{
+    // Si NO es admin, filtro por dependencia
+    if (! $isAdmin) {
+        $query->addSelect(['dias_advance', 'dependency_id'])
+              ->where('dependency_id', $user->dependency_id);
+    }
 
-                    }
-                }
+    // Antes de ejecutar, loggeo la sql y bindings (para revisar manualmente)
+    Log::info('DEBUG - Query SQL', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
+
+    // Ejecuto la consulta final
+    $orders = $query->get();
+
+    Log::info('DEBUG - Count orders', ['count' => $orders->count()]);
+
+    // Si no hay filas, hacemos pruebas de relajación para identificar el filtro que está matando resultados
+    if ($orders->count() === 0) {
+        // 1) Probar sin filtro state_id
+        $q1 = DB::table($table)
+            ->select(['contrato','iddncp','dias_advance','dias_advance_endo','state_id','dependency_id'])
+            ->where(function ($q) {
+                $q->where('dias_advance', '<=', 0)
+                  ->whereNull('dias_advance_endo');
+            })->orWhere(function ($q) {
+                $q->where('dias_advance', '<=', 0)
+                  ->where('dias_advance_endo', '<=', 0);
+            });
+
+        Log::info('DEBUG - q1 SQL', ['sql' => $q1->toSql(), 'bindings' => $q1->getBindings()]);
+        $res1 = $q1->limit(10)->get();
+        Log::info('DEBUG - q1 sample count', ['count' => $res1->count()]);
+        if ($res1->count() > 0) {
+            Log::info('DEBUG - q1 sample rows', $res1->toArray());
         }
 
-        return response()->json(['status' => 'success', 'alerta_advance' => $alerta_advance], 200);
-        //Mail::to('rogoma700@gmail.com')->send(new Enviar_alertas($contenido));
+        // 2) Probar solo estado y dependencia (sin condiciones de dias)
+        $q2 = DB::table($table)
+            ->select(['contrato','iddncp','dias_advance','dias_advance_endo','state_id','dependency_id'])
+            ->where('state_id', 1);
+
+        if (! $isAdmin) {
+            $q2->where('dependency_id', $user->dependency_id);
+        }
+
+        Log::info('DEBUG - q2 SQL', ['sql' => $q2->toSql(), 'bindings' => $q2->getBindings()]);
+        $res2 = $q2->limit(10)->get();
+        Log::info('DEBUG - q2 sample count', ['count' => $res2->count()]);
+        if ($res2->count() > 0) {
+            Log::info('DEBUG - q2 sample rows', $res2->toArray());
+        }
+
+        // 3) Probar filas con dias_advance NULL o texto extraño
+        $q3 = DB::table($table)
+            ->select(['contrato','iddncp','dias_advance','dias_advance_endo'])
+            ->whereRaw("CAST(dias_advance AS text) IS NOT NULL")
+            ->limit(10);
+
+        Log::info('DEBUG - q3 SQL', ['sql' => $q3->toSql(), 'bindings' => $q3->getBindings()]);
+        $res3 = $q3->get();
+        Log::info('DEBUG - q3 sample count', ['count' => $res3->count()]);
+        if ($res3->count() > 0) {
+            Log::info('DEBUG - q3 sample rows', $res3->toArray());
+        }
     }
+
+    // Construyo el arreglo final (aunque esté vacío)
+    $alerta_advance = [];
+    foreach ($orders as $order) {
+        $pac_id = number_format($order->iddncp ?? 0, 0, ",", ".");
+        $alerta_advance[] = ['pac_id' => $pac_id];
+    }
+    
+    // Log::info('DEBUG count orders = ' . $orders->count());
+    // Log::info('DEBUG orders raw', ['orders' => $orders->toArray()]);
+
+    return response()->json(['status' => 'success', 'alerta_advance' => $alerta_advance, 'count' => count($alerta_advance)], 200);
+}
+
+
 }
