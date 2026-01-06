@@ -216,7 +216,7 @@
                                                     </li>
                                                 @endif                                            
                                             
-                                                @if (Auth::user()->role->id == 4)
+                                                @if (Auth::user()->role->id == 30)
                                                     {{-- No mostrar nada si el rol es 4 --}}
                                                 @else
                                                     <li class="nav-item">
@@ -226,11 +226,15 @@
                                                     </li>
                                                 @endif
                                             
-                                                <li class="nav-item">
+                                                @if (Auth::user()->role->id == 30)
+                                                    {{-- No mostrar nada si el rol es 4 --}}
+                                                @else
+                                                    <li class="nav-item">
                                                     <a class="nav-link" data-toggle="tab" href="#tab2" role="tab"><i
                                                             class="fa fa-clone"></i> Órdenes de Ejec.</a>
                                                     <div class="slide"></div>
-                                                </li>
+                                                    </li>
+                                                @endif
                                             @endif
                                             
                                             @if (Auth::user()->role->id == 4)
