@@ -28,7 +28,9 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12 col-lg-8 offset-lg-2">
-                    <form class="md-float-material form-material" method="POST" action="{{ route('checkLogin') }}">
+                    {{-- <form class="md-float-material form-material" method="POST" action="{{ route('checkLogin') }}"> --}}
+                     <form class="md-float-material form-material theme-danger" method="POST" action="{{ route('checkLogin') }}">
+
                         @csrf
                         <div class="card mt-4">
                             <div class="container card-block">
@@ -38,8 +40,8 @@
                                         <img src="{{ asset('img/mspbs-logo.png') }}" width="100%" alt="SISOE - MSPBS">
                                     </div>
                                     <div class="col-md-12 col-lg-6 p-t-30">
-                                        <h3 class="text-center mt-2">SISOE</h3>
-                                        <h4 class="text-center text-mute">Sistema de Gestión de Ordenes de Ejecución de Componentes y Rubros de Obras</h4>
+                                        <h3 class="text-center mt-2">SISCONTRA</h3>
+                                        <h4 class="text-center text-mute">Sistema Integrado de Gestión de Contratos y Ordenes de Ejecución de Obras</h4>
                                         <hr class="mb-4">
 
                                         <div class="form-group">
@@ -62,7 +64,7 @@
 
                                         <div class="m-t-30">
                                             <div class="col-md-12">
-                                                <button type="submit" class="btn btn-primary btn-md btn-block waves-effect text-center m-b-20">INGRESAR</button>
+                                                <button type="submit" class="btn btn-info btn-md btn-block waves-effect text-center m-b-20">INGRESAR</button>
                                             </div>
                                         </div>
 
